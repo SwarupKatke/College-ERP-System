@@ -1,4 +1,4 @@
-name: College ERP CI/CD Pipeline
+name: College ERP DevOps CI/CD Pipeline
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build-test-package-deploy:
+  build-test-docker-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,29 +26,29 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build
+      - name: Build application
         run: |
           python -m py_compile app.py
 
-      - name: Run tests
+      - name: Run automated tests
         run: |
           python -m pytest
 
-      - name: Package application
+      - name: Build Docker image
         run: |
-          mkdir package
-          cp app.py package/
-          cp requirements.txt package/
-          cp test_app.py package/
-          cd package
-          zip -r ../college-erp-package.zip .
+          docker build -t college-erp:1.0 .
 
-      - name: Upload package
-        uses: actions/upload-artifact@v4
-        with:
-          name: college-erp-package
-          path: college-erp-package.zip
-
-      - name: Deploy
+      - name: Deploy using Docker Compose
         run: |
-          echo "College ERP System deployment completed successfully."
+          docker compose up -d
+          docker compose ps
+
+      - name: Verify Docker deployment
+        run: |
+          docker compose ps
+          docker compose logs --no-color college-erp || true
+
+      - name: Stop Docker Compose deployment
+        if: always()
+        run: |
+          docker compose down
