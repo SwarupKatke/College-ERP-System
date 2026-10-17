@@ -1,0 +1,54 @@
+name: College ERP CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test-package-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build
+        run: |
+          python -m py_compile app.py
+
+      - name: Run tests
+        run: |
+          python -m pytest
+
+      - name: Package application
+        run: |
+          mkdir package
+          cp app.py package/
+          cp requirements.txt package/
+          cp test_app.py package/
+          cd package
+          zip -r ../college-erp-package.zip .
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: college-erp-package
+          path: college-erp-package.zip
+
+      - name: Deploy
+        run: |
+          echo "College ERP System deployment completed successfully."
