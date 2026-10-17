@@ -3,6 +3,7 @@ students = {
     102: {"name": "Priya", "attendance": 90, "marks": 88}
 }
 
+
 def display_student(student_id):
     if student_id in students:
         student = students[student_id]
@@ -13,6 +14,16 @@ def display_student(student_id):
     else:
         print("Student not found.")
 
+
+def display_all_students():
+    print("\nAll Students")
+    for student_id, student in students.items():
+        print(student_id, "-", student["name"])
+
+
 print("College ERP System")
+
 student_id = int(input("Enter Student ID: "))
 display_student(student_id)
+
+display_all_students()
